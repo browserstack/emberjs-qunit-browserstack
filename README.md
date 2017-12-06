@@ -15,7 +15,7 @@
 ### Running Tests locally
 
 * `ember serve` Note: if ember is not present in the path then use `./node_modules/.bin/ember`
-* Visit your app at [http://localhost:4200](http://localhost:4200).
+* visit [http://localhost:4200/tests](http://localhost:4200/tests).
 
 ### Running Tests on Browserstack
 
