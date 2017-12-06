@@ -14,10 +14,10 @@
 
 ### Running Tests locally
 
-* `ember serve`
+* `ember serve` Note: if ember is not present in the path then use `./node_modules/.bin/ember`
 * Visit your app at [http://localhost:4200](http://localhost:4200).
 
 ### Running Tests on Browserstack
 
-* `ember serve`
+* `ember serve` Note: if ember is not present in the path then use `./node_modules/.bin/ember`
 * `./node_modules/.bin/browserstack-runner`
