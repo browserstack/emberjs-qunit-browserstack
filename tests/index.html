@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Dummy Tests</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {{content-for "head"}}
+    {{content-for "test-head"}}
+
+    <link rel="stylesheet" href="{{rootURL}}assets/vendor.css">
+    <link rel="stylesheet" href="{{rootURL}}assets/dummy.css">
+    <link rel="stylesheet" href="{{rootURL}}assets/test-support.css">
+
+    {{content-for "head-footer"}}
+    {{content-for "test-head-footer"}}
+  </head>
+  <body>
+    {{content-for "body"}}
+    {{content-for "test-body"}}
+
+    <script src="/testem.js" integrity=""></script>
+    <script src="{{rootURL}}assets/vendor.js"></script>
+    <script src="{{rootURL}}assets/test-support.js"></script>
+    <script src="{{rootURL}}assets/dummy.js"></script>
+    <script src="{{rootURL}}assets/tests.js"></script>
+    <script>
+      (function(){
+        var BrowserStack = {};
+        function getParameterByName(name) {
+          name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+          var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+              results = regex.exec(location.search);
+          return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+        // Tiny Ajax Post
+        var post = function (url, json, cb){
+          var req;
+          if (window.ActiveXObject)
+            req = new ActiveXObject('Microsoft.XMLHTTP');
+          else if (window.XMLHttpRequest)
+            req = new XMLHttpRequest();
+          else
+            throw "Strider: No ajax"
+          req.onreadystatechange = function () {
+              if (req.readyState==4)
+                cb(req.responseText);
+            };
+          var data = "data=" + encodeURIComponent(JSON.stringify(json));
+          req.open("POST", url, true);
+          req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+          req.setRequestHeader('X-Browser-String', BrowserStack.browser_string);
+          req.setRequestHeader('X-Worker-UUID', BrowserStack.worker_uuid);
+          req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+          req.send(data);
+        }
+        if (typeof console !== 'object') {
+          var console = {};
+          window.console = console;
+        }
+        _console_log = console.log;
+        console.log = function (arguments) {
+          post('/_log/', arguments, function () {});
+        };
+        console.warn = function (arguments) {
+          post('/_log/', arguments, function () {});
+        };
+        BrowserStack.post = post;
+        BrowserStack.getParameterByName = getParameterByName;
+        BrowserStack.browser_string = getParameterByName('_browser_string');
+        BrowserStack.worker_uuid = getParameterByName('_worker_key');
+        window.BrowserStack = BrowserStack;
+      })();
+      // For logging assertions on the console, here's what grunt-contrib-qunit uses:
+      // https://github.com/gruntjs/grunt-contrib-qunit/blob/784597023e7235337ca9c0651aa45124a2d72341/tasks/qunit.js#L45
+      (function (factory) {
+        if (typeof define === 'function' && define.amd) {
+          require(['qunit'], factory);
+        } else {
+          factory(QUnit);
+        }
+      }(function(QUnit) {
+        var failedAssertions = [];
+        var options,
+          currentModule,
+          currentTest,
+          setTimeoutVariable;
+        var pendingTest = {};
+        var testTimeout = function() {
+          var error = {
+            testName: currentTest,
+            message: "Stuck on this test for 60 sec."
+          };
+          BrowserStack.post('/_progress', {
+            tracebacks: [error]
+          }, function(){});
+        };
+        QUnit.testDone(function(details) {
+          var ct = details.module + " - " + details.name;
+          clearTimeout(pendingTest[ct]);
+        });
+        QUnit.testStart(function(details) {
+          currentTest = details.module + " - " + details.name;
+          pendingTest[currentTest] = setTimeout(function() {
+            testTimeout(currentTest);
+          }, 60000);
+        });
+        QUnit.log(function(details) {
+          if (details.result) {
+            return;
+          }
+          var error = {
+            actual: details.actual,
+            expected: details.expected,
+            message: details.message,
+            source: details.source,
+            testName:( details.module + ": " + details.name)
+          };
+          BrowserStack.post('/_progress', {
+            tracebacks: [error]
+          }, function(){});
+        });
+        QUnit.done(function(results) {
+          results.url = window.location.pathname;
+          BrowserStack.post("/_report", results, function(){});
+        });
+      }));
+    </script>
+
+    {{content-for "body-footer"}}
+    {{content-for "test-body-footer"}}
+  </body>
+</html>

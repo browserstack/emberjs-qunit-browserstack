@@ -1,0 +1,21 @@
+{
+    "username": "BROWSERSTACK_USERNAME",
+    "key": "BROWSERSTACK_KEY",
+    "test_path": "tests/index.html",
+    "test_server": "http://localhost:4200",
+    "test_framework": "qunit",
+    "browsers": [
+        {
+            "browser": "firefox",
+            "browser_version": "latest",
+            "os": "OS X",
+            "os_version": "El Capitan"
+        },
+        {
+            "browser": "chrome",
+            "browser_version": "latest",
+            "os": "Windows",
+            "os_version": "10"
+        }
+    ]
+}
