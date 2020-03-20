@@ -44,7 +44,10 @@ module('setupRenderingTest tests', function(hooks) {
   });
 
   test('can invoke helper', async function(assert) {
-    this.owner.register('helper:jax', helper(([name]) => `${name}-jax`));
+    this.owner.register(
+      'helper:jax',
+      helper(([name]) => `${name}-jax`)
+    );
 
     await render(hbs`{{jax "max"}}`);
 
